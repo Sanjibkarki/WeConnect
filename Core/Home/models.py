@@ -35,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username",]
+    REQUIRED_FIELDS = ["username"]
     objects = UserManager()
 
     def __str__(self):
@@ -44,3 +44,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_admin
+
+class CollegePortal(models.Model):
+    host = models.ForeignKey(User,on_delete=models.CASCADE)
+    students = models.JSONField(default=list)
+    email_students = models.JSONField(default=list)
+    
+    

@@ -22,7 +22,6 @@ function Login1(){
     dispatch(login(email, password));
   };
   if (isAuthenticated) {
-    const res = axios.get('http://127.0.0.1:8000/api/token');
     return <Navigate replace to="/" />;
     
     

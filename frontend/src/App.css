@@ -56,7 +56,7 @@
 }
 
 .landing-page {
-  background-image: url('./img/weconnect.jpg');
+  background-image: url('./utils/img/weconnect.jpg');
   background-repeat: no-repeat;
   background-position: center; /* Center the background image */
   width: 80%; /* Adjust width as needed */

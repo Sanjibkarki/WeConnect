@@ -1,28 +1,37 @@
 import React, { useState } from 'react';
-
+import { useSelector} from "react-redux";
+import axiosInstance from '../utils/setauthaxios';
 const Service = () => {
-  const [numStudents, setNumStudents] = useState(0);
-  const [studentNames, setStudentNames] = useState([]);
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
+  const user = useSelector(state => state.auth.user);
+  const [numStudents, setNumStudents] = useState(0);
+  const [students, setstudents] = useState([]);
   const handleNumStudentsChange = (e) => {
     let num = parseInt(e.target.value, 10) || 0;
     if (num > 50) num = 50;
     setNumStudents(num);
 
-    // Initialize or adjust the studentNames array length
-    setStudentNames(Array(num).fill(''));
+    setstudents(Array(num).fill(''));
   };
 
   const handleStudentNameChange = (index, value) => {
-    const newStudentNames = [...studentNames];
-    newStudentNames[index] = value;
-    setStudentNames(newStudentNames);
+    const newstudents = [...students];
+    newstudents[index] = value;
+    setstudents(newstudents);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Student names:', studentNames);
+    
+    try {
+      const body = JSON.stringify({'host':user,'students':students});
+      const res = await axiosInstance.post('http://127.0.0.1:8000/api/user',body);
+  
+    } catch (err) {
+      console.log(err)
+    }
+    
   };
 
   return (
@@ -41,12 +50,13 @@ const Service = () => {
           <label>Student {index + 1} Name:</label>
           <input 
             type="text"
-            value={studentNames[index]} 
+            value={students[index]}
+            name={`value${index + 1}`}
             onChange={(e) => handleStudentNameChange(index, e.target.value)} 
           />
         </div>
       ))}
-      <button type="submit">Submit</button>
+      {isAuthenticated && <button type="submit">Submit</button>}
     </form>
   );
 };

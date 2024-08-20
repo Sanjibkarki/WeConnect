@@ -25,14 +25,16 @@ const authSlice = createSlice({
       
     },
     loginfail: (state) => {
-      state.token = null;
+      state.access = null;
+      state.refresh = null;
       state.isAuthenticated = false;
       
     },
-    userloaded: (state,action)=>{
+    userloaded: (state,action) => {
+      state.user = action.payload;
       state.isAuthenticated = true;
-      state.user = action.payload ;
-    }
+      
+    },
   }
 });
 
@@ -40,18 +42,32 @@ export const { loginsuccess,loginfail,userloaded,autherror } = authSlice.actions
 
 export default authSlice.reducer;
 
-
 export const loadUser = () => async (dispatch) => {
-  if (localStorage.token) {
-    setAuthToken(localStorage.token);
-  }
-  try {
-
-    const res = await axios.get('http://127.0.0.1:8000/api/token');
-    console.log(res)
-    dispatch(userloaded(res.data));
-
-  } catch (err) {
+  const access = localStorage.getItem('access');
+  
+  if (access) {
+    setAuthToken(access);
+    try {
+      const res = await axios.get('http://127.0.0.1:8000/api/user');
+      dispatch(userloaded(res.data.user.email));
+    } catch (err) {
+      try {
+        const config = {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        };
+        const body = JSON.stringify({ refresh: localStorage.getItem('refresh') });
+        const res = await axios.post('http://127.0.0.1:8000/api/token/refresh', body, config);
+        localStorage.setItem('access', res.data.access);
+        setAuthToken(res.data.access);
+        const userRes = await axios.get('http://127.0.0.1:8000/api/user');
+        dispatch(userloaded(userRes.data.user.email));
+      } catch (err) {
+        dispatch(autherror());
+      }
+    }
+  } 
+  else{
     dispatch(autherror());
   }
 };
@@ -59,14 +75,18 @@ export const loadUser = () => async (dispatch) => {
 export const login = (email, password) => async dispatch => {
   
   const config = {
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
+    withCredentials : true
   };
 
   const body = JSON.stringify({ email, password });
   try {
     const res = await axios.post("http://127.0.0.1:8000/api/token",body, config);
+    localStorage.setItem('access',res.data.access)
+    localStorage.setItem('refresh',res.data.refresh)
+    localStorage.setItem('token-expiry',res.data.token_expiry)
     dispatch(loginsuccess({access:res.data.access,refresh:res.data.refresh}));
-    dispatch(loadUser());
+    dispatch(loadUser())
   } catch (err) {
     dispatch(loginfail());
   }

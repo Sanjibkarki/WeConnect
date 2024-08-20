@@ -1,10 +1,24 @@
-import {Link } from 'react-router-dom';
+import {Link,Navigate } from 'react-router-dom';
 import { Fragment } from 'react';
-
-
+import { useSelector,useDispatch } from 'react-redux';
+import {loadUser,loginfail } from '../reducers/auth';
+import { useEffect } from 'react';
 function Nav(){
-    
-    const isAuthenticated = false;
+    const dispatch = useDispatch();
+    useEffect(() => {
+        if (localStorage.getItem('access')){
+            dispatch(loadUser())
+        }
+        else{
+            dispatch(loginfail())
+        }
+    }, [dispatch]);
+    const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+
+    if (isAuthenticated==false) {
+        return <Navigate replace to="/sign in" />;
+        
+      }
    
 
     const nav = (
