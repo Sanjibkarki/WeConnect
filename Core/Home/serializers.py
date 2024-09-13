@@ -26,7 +26,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     def validate(self, attrs):
         data = super().validate(attrs)
-        data['name'] = self.user.email
         refresh_token_lifetime = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
         current_time = datetime.utcnow()  
         future_time = current_time + refresh_token_lifetime

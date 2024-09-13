@@ -23,21 +23,22 @@ class GetAuthUserView(APIView):
     authentication_classes = [JWTAuthentication]
     
     def get(self, request):
-        user = request.user
-        token_expiry_str = request.session.get('token-expiry')
-        
+        user = request.user        
+        token_expiry_str = request.session.get('token_expiry')
+        print(user.uuid)
+        print(token_expiry_str)
         if token_expiry_str:
             token_expiry = datetime.fromisoformat(token_expiry_str)
-            
             remaining_time = token_expiry - datetime.now()
-            
             user_data = {
                 'email': user.email,
+                'uuid':user.uuid,
                 'token-time': remaining_time
             }
         else:
             user_data = {
                 'email': user.email,
+                'uuid':user.uuid,
             }
         
         return Response({'user': user_data})

@@ -4,6 +4,8 @@ from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
 )
+import string
+import random
 
 
 # Create your models here.
@@ -27,9 +29,14 @@ class UserManager(BaseUserManager):
         return user
 
 
+def generate_short_uuid(length=10):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(primary_key=True)
     username = models.CharField(max_length=200,unique=True)
+    uuid = models.CharField(default=generate_short_uuid, max_length=10, unique=True, editable=False)
     date = models.DateField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

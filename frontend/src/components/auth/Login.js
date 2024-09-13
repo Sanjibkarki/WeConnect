@@ -24,7 +24,6 @@ function Login1(){
   if (isAuthenticated) {
     return <Navigate replace to="/" />;
     
-    
   }
 
   return (

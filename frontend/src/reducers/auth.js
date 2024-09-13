@@ -1,13 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 import axios from "axios";
 import setAuthToken from "../utils/setAuthToken";
+import axiosInstance from '../utils/setauthaxios';
 
 const initialState = {
   access: null,
   refresh: null,
   isAuthenticated: false,
   loading: true,
-  user: null
+  user: null,
+  uuid:null
 };
 
 const authSlice = createSlice({
@@ -20,7 +22,8 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
     },
     autherror : (state) => {
-      state.token = null;
+      state.user = null;
+      state.uuid = null;
       state.isAuthenticated = false;
       
     },
@@ -31,7 +34,8 @@ const authSlice = createSlice({
       
     },
     userloaded: (state,action) => {
-      state.user = action.payload;
+      state.user = action.payload.user;
+      state.uuid = action.payload.uuid;
       state.isAuthenticated = true;
       
     },
@@ -45,26 +49,12 @@ export default authSlice.reducer;
 export const loadUser = () => async (dispatch) => {
   const access = localStorage.getItem('access');
   
-  if (access) {
-    setAuthToken(access);
+  if (access ) {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/user');
-      dispatch(userloaded(res.data.user.email));
+      const res = await axiosInstance.get('/user');
+      dispatch(userloaded({user:res.data.user.email,uuid:res.data.user.uuid}));
     } catch (err) {
-      try {
-        const config = {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        };
-        const body = JSON.stringify({ refresh: localStorage.getItem('refresh') });
-        const res = await axios.post('http://127.0.0.1:8000/api/token/refresh', body, config);
-        localStorage.setItem('access', res.data.access);
-        setAuthToken(res.data.access);
-        const userRes = await axios.get('http://127.0.0.1:8000/api/user');
-        dispatch(userloaded(userRes.data.user.email));
-      } catch (err) {
-        dispatch(autherror());
-      }
+      console.error('Failed to load user data:', err);
     }
   } 
   else{

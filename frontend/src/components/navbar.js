@@ -15,7 +15,7 @@ function Nav(){
     }, [dispatch]);
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
-    if (isAuthenticated==false) {
+    if (isAuthenticated===false) {
         return <Navigate replace to="/sign in" />;
         
       }
